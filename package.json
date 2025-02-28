@@ -1,5 +1,5 @@
 {
-  "name": "chess",
+  "name": "chess-game",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,15 +9,23 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@heroui/react": "^2.7.4",
-    "framer-motion": "^12.4.7",
-    "next": "15.2.0",
-    "postcss": "^8.5.3",
+    "@heroui/react": "2.7.4",
+    "@tailwindcss/postcss": "^4.0.7",
+    "axios": "^1.7.7",
+    "framer-motion": "^11.11.15",
+    "next": "^15.2.0",
+    "nextjs-toploader": "^3.7.15",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-hook-form": "^7.53.2",
+    "react-hot-toast": "^2.4.1",
+    "zustand": "^5.0.1"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.0.9",
-    "tailwindcss": "^4.0.9"
+    "@iconify/react": "^5.2.0",
+    "autoprefixer": "^10.4.20",
+    "cross-env": "^7.0.3",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^3.4.17"
   }
 }

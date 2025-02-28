@@ -62,11 +62,15 @@
     url("../fonts/YekanBakh-ExtraBlack.woff2") format("woff2");
 }
 
+/* @import "@flaticon/flaticon-uicons/css/all/all"; */
 
 html {
   scroll-behavior: smooth;
+  background: #fff;
 }
 
 body {
   font-family: YekanBakh, sans-serif;
+  background: #fff;
+  scrollbar-width: none;
 }
