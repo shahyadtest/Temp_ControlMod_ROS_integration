@@ -1,5 +1,5 @@
 import Background from "@/components/chessboard/Background";
-import Chess from "@/components/chessboard/Chess";
+import Chess from "@/components/chessboard/CustomChessBoard";
 import React from "react";
 
 const page = () => {

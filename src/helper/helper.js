@@ -16,40 +16,6 @@ const toFarsiNumber = (num) => {
   }
 };
 
-const getFileSize = (bytes, decimals = 2) => {
-  if (bytes === 0) return "0 Bytes";
-  const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ["بایت", "کیلوبایت", "مگابایت", "گیگابایت"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
-};
-
-const convertDigits = (num, to = "fa", separate = false) => {
-  if (!num) return ""; // جلوگیری از کرش در مقدار null یا undefined
-  const enDigits = "0123456789";
-  const faDigits = "۰۱۲۳۴۵۶۷۸۹";
-
-  let convertedNum = num
-    .split("")
-    .map((char) => {
-      if (to === "fa") {
-        let index = enDigits.indexOf(char);
-        return index !== -1 ? faDigits[index] : char;
-      } else {
-        let index = faDigits.indexOf(char);
-        return index !== -1 ? enDigits[index] : char;
-      }
-    })
-    .join("");
-
-  if (separate) {
-    convertedNum = convertedNum.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  }
-
-  return convertedNum;
-};
-
 const getGreeting = () => {
   const hour = new Date().getHours(); // گرفتن ساعت فعلی سیستم
 
@@ -64,4 +30,19 @@ const getGreeting = () => {
   }
 };
 
-export { convertDigits, getGreeting, getFileSize, toFarsiNumber, idGenerator };
+const getSquareColor = (square) => {
+
+  const file = square.charAt(0);
+  const rank = square.charAt(1);
+
+
+  const fileNumber = file.charCodeAt(0) - "a".charCodeAt(0) + 1;
+
+
+  const sum = fileNumber + parseInt(rank);
+
+
+  return sum % 2 === 0 ? "black" : "white";
+};
+
+export { getGreeting, toFarsiNumber, getSquareColor,idGenerator };
