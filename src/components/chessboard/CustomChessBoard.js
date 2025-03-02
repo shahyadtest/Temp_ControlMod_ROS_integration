@@ -4,106 +4,123 @@ import { Chessboard } from "react-chessboard";
 import BoardLabels from "./BoardLabels";
 import { Chess } from "chess.js";
 import { getSquareColor } from "@/helper/helper";
-import { customPieces } from "./customPieces";
+import { blackPieces, customPieces, whitePieces } from "./customPieces";
+import Image from "next/image";
 
 const CustomChessBoard = () => {
   const [game, setGame] = useState(new Chess());
   const [highlightedSquares, setHighlightedSquares] = useState({});
   const [moveHistory, setMoveHistory] = useState([]);
   const [selectedSquare, setSelectedSquare] = useState(null);
+  const [capturedPieces, setCapturedPieces] = useState([]);
 
   // get possible moves when user click on piece
   const getPossibleMoves = (square) => {
     const moves = game.moves({ square, verbose: true });
-    const newHighlights = {};
-    moves.forEach((move) => {
-      newHighlights[move.to] = true;
-    });
-    setHighlightedSquares(newHighlights);
+    return Object.fromEntries(
+      moves.map((move) => [move.to, { backgroundColor: "#a9d18e" }]) // رنگ خانه‌های ممکن
+    );
   };
 
   // انجام حرکت مهره با کلون کردن وضعیت بازی
   const makeMove = (from, to) => {
-    // کلون کردن وضعیت فعلی بازی
-    const newGame = new Chess(game.fen());
-    const move = newGame.move({ from, to, promotion: "q" });
-    if (move === null) {
-      // اگر حرکت نامعتبر بود، هیچ کاری انجام نمی‌دهیم
-      return false;
-    }
-    // آپدیت وضعیت بازی با نمونه جدید
-    setGame(newGame);
-    setSelectedSquare(null);
-    setHighlightedSquares({});
-    return true;
-  };
+    const move = game.move({ from, to, promotion: "q" });
 
-  // مدیریت کلیک روی هر خانه
-  const handleSquareClick = (square) => {
-    // اگر یک مهره انتخاب شده و خانه کلیک‌شده جزو حرکات مجاز است
-    if (selectedSquare && highlightedSquares[square]) {
-      const success = makeMove(selectedSquare, square);
-      if (!success) {
-        // در صورت نامعتبر بودن حرکت (که نباید رخ بده چون از chess.js استفاده می‌کنیم)
-        console.error("حرکت نامعتبر");
+    if (move) {
+      if (move.captured) {
+        setCapturedPieces((prev) => [
+          ...prev,
+          { type: move.captured, color: move.color === "w" ? "b" : "w" },
+        ]);
       }
-      return;
-    }
 
-    // دریافت مهره موجود در خانه کلیک شده
-    const piece = game.get(square);
-    // اگر مهره وجود داشته باشد و به نوبت بازی باشد
-    if (piece && piece.color === game.turn()) {
-      // اگر روی همان مهره دوباره کلیک کردیم، انتخاب لغو شود
-      if (square === selectedSquare) {
-        setSelectedSquare(null);
-        setHighlightedSquares({});
-        return;
-      }
-      setSelectedSquare(square);
-      getPossibleMoves(square);
-    } else {
-      // اگر خانه خالی یا متعلق به حریف است، انتخاب قبلی پاک شود
+      setGame(new Chess(game.fen()));
       setSelectedSquare(null);
       setHighlightedSquares({});
     }
   };
 
-  return (
-    <div className="w-full relative p-4 bg-gray-50 bg-opacity-15 backdrop-blur border border-gray-50 border-opacity-15 rounded-3xl">
-      {/* board Labels */}
-      <BoardLabels />
+  // مدیریت کلیک روی هر خانه
+  const handleSquareClick = (square) => {
+    if (selectedSquare === square) {
+      setSelectedSquare(null);
+      setHighlightedSquares({});
+      return;
+    }
 
-      <Chessboard
-        animationDuration={300}
-        onSquareClick={handleSquareClick}
-        onPieceDrop={(sourceSquare, targetSquare) => {
-          const success = makeMove(sourceSquare, targetSquare);
-          return success;
-        }}
-        customPieces={customPieces()}
-        customDarkSquareStyle={{ backgroundColor: "#373855" }}
-        customLightSquareStyle={{ backgroundColor: "#d1d5db" }}
-        showBoardNotation={false}
-        customBoardStyle={{
-          height: "fit-content",
-          borderRadius: "16px",
-          direction: "ltr",
-        }}
-        position={game.fen()}
-        customSquareStyles={{
-          ...Object.fromEntries(
-            Object.keys(highlightedSquares).map((square) => [
-              square,
-              {
-                background: "radial-gradient(#3D4AEB 30%, transparent 30%)",
-                borderRadius: "50%", 
-              },
-            ])
-          ),
-        }}
-        id="BasicBoard"
-      />
+    if (selectedSquare && highlightedSquares[square]) {
+      makeMove(selectedSquare, square);
+      return;
+    }
+
+    const piece = game.get(square);
+    if (piece?.color === game.turn()) {
+      setSelectedSquare((prev) => (prev === square ? null : square));
+      setHighlightedSquares((prev) =>
+        prev === square ? {} : getPossibleMoves(square)
+      );
+    } else {
+      setSelectedSquare(null);
+      setHighlightedSquares({});
+    }
+  };
+
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center gap-1 self-end">
+        {capturedPieces.map(
+          (pieces) =>
+            pieces.color === "b" && (
+              <img src={blackPieces[pieces.type]} className="size-8" />
+            )
+        )}
+      </div>
+
+      <div className="w-full relative p-4 bg-gray-50 bg-opacity-15 backdrop-blur border border-gray-50 border-opacity-15 rounded-3xl">
+        {/* board Labels */}
+        <BoardLabels />
+
+        <Chessboard
+          animationDuration={500}
+          onSquareClick={handleSquareClick}
+          onPieceDrop={(sourceSquare, targetSquare) => {
+            const success = makeMove(sourceSquare, targetSquare);
+            return success;
+          }}
+          customPieces={customPieces()}
+          customDarkSquareStyle={{ backgroundColor: "#373855" }}
+          customLightSquareStyle={{ backgroundColor: "#d1d5db" }}
+          showBoardNotation={false}
+          customBoardStyle={{
+            height: "fit-content",
+            borderRadius: "16px",
+            direction: "ltr",
+          }}
+          position={game.fen()}
+          customSquareStyles={{
+            ...Object.fromEntries(
+              Object.keys(highlightedSquares).map((square) => [
+                square,
+                {
+                  background: "radial-gradient(#3D4AEB 30%, transparent 30%)",
+                  borderRadius: "50%",
+                },
+              ])
+            ),
+          }}
+          id="BasicBoard"
+        />
+      </div>
+
+      <div className="flex items-center gap-1 self-start">
+        {capturedPieces.map(
+          (pieces) =>
+            pieces.color === "w" && (
+              <img src={whitePieces[pieces.type]} className="size-8" />
+            )
+        )}
+      </div>
     </div>
   );
 };

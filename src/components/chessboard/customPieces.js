@@ -1,3 +1,21 @@
+export const whitePieces = {
+  p: "/pieces/white-pawn.svg",
+  r: "/pieces/white-rook.svg",
+  n: "/pieces/white-knight.svg",
+  b: "/pieces/white-bishop.svg",
+  q: "/pieces/white-queen.svg",
+  k: "/pieces/white-king.svg",
+} 
+
+export const blackPieces = {
+  p: "/pieces/black-pawn.svg",
+  r: "/pieces/black-rook.svg",
+  n: "/pieces/black-knight.svg",
+  b: "/pieces/black-bishop.svg",
+  q: "/pieces/black-queen.svg",
+  k: "/pieces/black-king.svg",
+} 
+
 export const customPieces = () => {
   const pieceImages = {
     wP: "/pieces/white-pawn.svg",
