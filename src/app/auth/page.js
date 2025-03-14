@@ -3,6 +3,7 @@
 import { Button, Input, Spinner } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import Image from "next/image";
+import Link from "next/link";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -51,7 +52,6 @@ const page = () => {
       <div className="relative flex flex-col justify-center items-center z-10 p-5">
         <h1 className="text-4xl font-black leading-[50px] md:leading-[70px] bg-gradient-to-b from-white to-gray-600 bg-clip-text text-transparent">
           شطرنج آنلاین
-
         </h1>
 
         <p className="text-sm bg-gradient-to-b from-white to-gray-400 bg-clip-text text-transparent">
@@ -67,9 +67,11 @@ const page = () => {
         </p>
 
         <div className="w-full flex flex-col items-center gap-4 mt-4">
-          <h2 className="text-xl font-black bg-gradient-to-b from-white to-gray-600 bg-clip-text text-transparent mt-4">
-            ثبت نام و ورود به بازی
-          </h2>
+          <Link href={"/"}>
+            <h2 className="text-xl font-black bg-gradient-to-b from-white to-gray-600 bg-clip-text text-transparent mt-4">
+              ثبت نام و ورود به بازی
+            </h2>
+          </Link>
 
           <div className="w-full flex flex-col gap-3">
             <Input
@@ -228,7 +230,6 @@ const page = () => {
             >
               ثبت نام و ورود
             </Button>
-
           </div>
         </div>
       </div>

@@ -10,9 +10,8 @@ export const metadata = {
 export default async function RootLayout({ children }) {
   return (
     <html lang="fa" dir="rtl" className="dark">
-
       <body className="w-full bg-blackColor">
-        {/* <NextTopLoader color="#dc2626" showSpinner={false} /> */}
+        <NextTopLoader color="#3D4AEB" showSpinner={false} />
 
         <Providers>{children}</Providers>
       </body>
