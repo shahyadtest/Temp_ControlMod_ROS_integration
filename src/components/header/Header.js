@@ -1,4 +1,7 @@
+"use client";
+
 import { toFarsiNumber } from "@/helper/helper";
+import { useUser } from "@/store/useUser";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -22,6 +25,7 @@ export const ranks = [
 // filter: blur(60px);
 
 const Header = () => {
+  const { user } = useUser();
   const userRank = ranks[0];
 
   return (
@@ -36,11 +40,13 @@ const Header = () => {
           />
 
           <div className="flex flex-col gap-1">
-            <h2 className="text-sm">شهیاد کریمی</h2>
+            <h2 className="text-sm">{user?.nickName}</h2>
 
-            <span className="text-xs text-gray-400">
-              {toFarsiNumber("09016599086")}
-            </span>
+            {user?.phoneNumber && (
+              <span className="text-xs text-gray-400">
+                {toFarsiNumber(user?.phoneNumber)}
+              </span>
+            )}
           </div>
         </div>
 

@@ -13,7 +13,9 @@ const SearchFriends = () => {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState([]);
+
   console.log(user);
+
   const onChangeSearchHandler = (e) => {
     const value = e.target.value;
     setSearch(value);
