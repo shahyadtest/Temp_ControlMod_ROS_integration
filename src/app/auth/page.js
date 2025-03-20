@@ -37,14 +37,6 @@ const page = () => {
 
   const showPasswordToggle = () => setShowPassword(!showPassword);
 
-  useEffect(() => {
-    // getData("/user/get-info", {})
-    //   .then((res) => {})
-    //   .catch((err) => {
-    //     setLoading(false);
-    //   });
-  }, []);
-
   const userRegisterHandler = (data) => {
     setLoading(true);
 

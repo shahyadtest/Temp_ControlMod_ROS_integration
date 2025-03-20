@@ -1,30 +1,24 @@
-import { baseURL } from "@/services/API";
+"use client";
 
-export async function getUser() {
-  const token = (await cookies()).get("token")?.value;
+import { getData } from "@/services/API";
+import { useUser } from "@/store/useUser";
+import React, { useEffect } from "react";
 
-  if (!token) {
-    return null;
-  }
+const GetUser = () => {
+  const { setUser } = useUser();
 
-  try {
-    const userRes = await fetch(`${baseURL}/user/userinfo`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+  useEffect(() => {
+    // get user info
+    getData("/user/get-info", {})
+      .then((res) => {
+        setUser(res.data.user);
+      })
+      .catch((err) => {
+        setLoading(false);
+      });
+  }, []);
 
-    if (!userRes.ok) {
-      console.log("error ok22");
+  return null;
+};
 
-      return null;
-    }
-
-    const userData = await userRes.json();
-
-    return userData;
-  } catch (error) {
-    console.log(error);
-  }
-}
+export default GetUser;

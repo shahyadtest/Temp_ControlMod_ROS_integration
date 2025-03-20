@@ -6,12 +6,14 @@ import Image from "next/image";
 import React, { useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import UserItem from "./UserItem";
+import { useUser } from "@/store/useUser";
 
 const SearchFriends = () => {
+  const { user } = useUser();
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState([]);
-
+  console.log(user);
   const onChangeSearchHandler = (e) => {
     const value = e.target.value;
     setSearch(value);
