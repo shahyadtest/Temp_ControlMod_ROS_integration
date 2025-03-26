@@ -2,7 +2,6 @@ import connectDB from "@/lib/db";
 import FriendRequest from "@/models/FriendRequest";
 import Friendship from "@/models/Friendship";
 import jwt from "jsonwebtoken";
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 export async function GET(req) {
@@ -10,12 +9,17 @@ export async function GET(req) {
     await connectDB();
 
     // get user token
-    const token = req.cookies.get("token")?.value || req.headers.get("authorization").split(" ")[1];
+    const token =
+      req.cookies.get("token")?.value ||
+      req.headers.get("authorization").split(" ")[1];
     if (!token) {
-      return NextResponse.json({ error: "توکن یافت نشد.",auth }, { status: 401 });
+      return NextResponse.json(
+        { error: "توکن یافت نشد.", auth },
+        { status: 401 }
+      );
     }
 
-  // get user id by token
+    // get user id by token
     let userId;
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -37,10 +41,9 @@ export async function GET(req) {
 
     // find users friendship requests
     const friendRequests = await FriendRequest.find({
-      $or: [{ sender: userId }, { receiver: userId }],
+      receiver: userId,
       status: "pending", // return requests with pending status
     }).populate("sender receiver", "userName nickName");
-
 
     return NextResponse.json({
       message: "درخواست با موفقیت انجام شد.",

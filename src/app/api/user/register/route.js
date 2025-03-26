@@ -57,7 +57,7 @@ export async function POST(req) {
     const response = NextResponse.json(
       {
         message: "ثبت‌ نام با موفقیت انجام شد",
-        user: { ...newUser._doc, accessToken },
+        user: { ...newUser._doc },
       },
       { status: 200 }
     );

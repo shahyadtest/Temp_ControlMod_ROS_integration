@@ -1,6 +1,7 @@
 "use client";
 
 import { getData, postData } from "@/services/API";
+import { useUser } from "@/store/useUser";
 import { Button, Input } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import Image from "next/image";
@@ -14,6 +15,7 @@ const page = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { setUser } = useUser();
 
   const {
     register,
@@ -52,6 +54,8 @@ const page = () => {
         });
 
         router.push("/");
+
+        setUser(res.data.user);
       })
       .catch((err) => {
         setLoading(false);
