@@ -22,8 +22,6 @@ const page = async () => {
 
   const data = await res.json();
 
-  console.log(data);
-
   return (
     <div className="relative max-w-[450px] flex flex-col items-center gap-5 w-full h-screen bg-primaryDarkTheme overflow-hidden p-5">
       <Navbar />

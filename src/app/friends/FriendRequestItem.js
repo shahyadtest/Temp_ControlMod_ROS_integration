@@ -31,7 +31,7 @@ const FriendRequestItem = ({ userInfo }) => {
       .catch((err) => {
         setLoadingType(null);
 
-        toast.success(err.response.data.message, {
+        toast.error(err.response.data.message, {
           style: {
             borderRadius: "10px",
             background: "#040e1c",

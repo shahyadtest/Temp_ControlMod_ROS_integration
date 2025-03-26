@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import FriendRequestItem from "./FriendRequestItem";
 
 const FriendRequests = ({ data }) => {
-  const [openDrawer, setOpenDrawer] = useState(true);
+  const [openDrawer, setOpenDrawer] = useState(false);
 
   return (
     <>
@@ -22,6 +22,7 @@ const FriendRequests = ({ data }) => {
       </div>
 
       <div
+        onClick={() => setOpenDrawer(false)}
         className={`${
           openDrawer ? "opacity-100 visible" : "opacity-0 invisible"
         } bg-black bg-opacity-60 w-full h-full fixed top-0 bottom-0 right-0 z-40 transition-all duration-300`}
@@ -30,7 +31,7 @@ const FriendRequests = ({ data }) => {
       <div
         className={`${
           openDrawer ? "bottom-0" : "-bottom-full"
-        } w-full h-96 right-0 bg-primaryDarkTheme absolute z-50 rounded-t-3xl`}
+        } w-full h-96 right-0 bg-primaryDarkTheme absolute z-50 rounded-t-3xl transition-all duration-300`}
       >
         <div className="w-full h-full p-5 relative flex flex-col gap-3 pt-12">
           <span className="w-20 h-2 rounded-full bg-grayColor absolute top-4 left-2/4 -translate-x-2/4 block"></span>

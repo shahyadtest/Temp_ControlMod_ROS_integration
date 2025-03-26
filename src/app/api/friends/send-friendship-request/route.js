@@ -15,26 +15,37 @@ export async function POST(request) {
       );
     }
 
-    // check if friendship request exist
+    // check if request exist
     const existingRequest = await FriendRequest.findOne({
       sender: senderId,
       receiver: receiverId,
     });
+
     if (existingRequest) {
-      return NextResponse.json(
-        { message: "درخواست قبلاً ارسال شده است." },
-        { status: 400 }
-      );
+      if (existingRequest.status === "pending") {
+        return NextResponse.json(
+          { message: "درخواست قبلاً ارسال شده است." },
+          { status: 400 }
+        );
+      } else if (existingRequest.status === "rejected") {
+        // if request was rejected send new request
+        await FriendRequest.findByIdAndDelete(existingRequest._id);
+      }
     }
 
-    // save requet in db
-    await FriendRequest.create({ sender: senderId, receiver: receiverId });
+    // create new friendship request
+    await FriendRequest.create({
+      sender: senderId,
+      receiver: receiverId,
+      status: "pending",
+    });
 
     return NextResponse.json(
       { message: "درخواست دوستی ارسال شد!" },
       { status: 200 }
     );
   } catch (error) {
+    console.error("خطا در ارسال درخواست دوستی:", error);
     return NextResponse.json({ error: "مشکلی رخ داده است." }, { status: 500 });
   }
 }

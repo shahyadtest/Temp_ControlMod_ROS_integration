@@ -1,5 +1,7 @@
+import connectDB from "@/lib/db";
 import FriendRequest from "@/models/FriendRequest";
 import Friendship from "@/models/Friendship";
+import { NextResponse } from "next/server";
 
 export async function POST(req) {
   try {
