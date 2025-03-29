@@ -1,12 +1,15 @@
 import axios from "axios";
 
-export const baseURL = "http://localhost:3000/api";
-export const siteURL = "http://localhost:3000";
+const hostName =
+  process.env.NODE_ENV === "development" ? "http://localhost:3000" : "";
+
+export const baseURL = `${hostName}/api`;
+export const siteURL = `${hostName}`;
 // eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2N2UzY2MyMjU3ZmUwY2E1NDNhYTE2ODEiLCJwaG9uZU51bWJlciI6IjA5MDE2NTk5MDg2IiwiaWF0IjoxNzQyOTgyMTc4fQ.WPEF8pi_BrP_8eICXtQtI35Alw_QCEkAq2CadgKf7aQ
 
 // axios config
 const servicesApi = axios.create({
-  baseURL: "http://localhost:3000/api",
+  baseURL: `${hostName}/api`,
   withCredentials: false,
   timeout: 60000000,
   headers: {

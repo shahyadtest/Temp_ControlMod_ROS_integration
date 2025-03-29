@@ -1,3 +1,5 @@
+"use client"
+
 import { postData } from "@/services/API";
 import { Spinner } from "@heroui/react";
 import Image from "next/image";
