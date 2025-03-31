@@ -4,19 +4,24 @@ import { Providers } from "./providers";
 import NextTopLoader from "nextjs-toploader";
 import QueryProvider from "./QueryProvider";
 import GetUserInfo from "@/lib/GetUserInfo";
+import { cookies } from "next/headers";
+import { baseURL } from "@/services/API";
+import { getUser } from "@/lib/fetchUser";
 
 export const metadata = {
   title: "Chess Game",
 };
 
 export default async function RootLayout({ children }) {
+  const userInfo = await getUser();
+
   return (
     <html lang="fa" dir="rtl" className="dark">
       <body className="w-full bg-blackColor">
         <NextTopLoader color="#3D4AEB" showSpinner={false} />
 
         <Providers>
-          <GetUserInfo />
+          <GetUserInfo userInfo={userInfo} />
           <QueryProvider>{children}</QueryProvider>
         </Providers>
       </body>

@@ -5,23 +5,17 @@ import { useUser } from "@/store/useUser";
 import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
 
-const GetUserInfo = () => {
+const GetUserInfo = ({userInfo}) => {
   const { setUser } = useUser();
   const router = useRouter();
 
   useEffect(() => {
     // get user info
-    getData("/user/get-info", {})
-      .then((res) => {
-        setUser(res.data.user);
+    setUser(userInfo.user);
 
-        if (!res.data.user) {
-          router.push("/auth");
-        }
-      })
-      .catch((err) => {
-        router.push("/auth");
-      });
+    if (!userInfo.user) {
+      router.push("/auth");
+    }
   }, []);
 
   return null;
