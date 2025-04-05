@@ -24,7 +24,7 @@ const RockPaperScissors = ({ user }) => {
 
     socket.on("onlineUsers", (users) => console.log(users));
 
-    socket.on("gameFound", ({ roomId, opponent }) => {
+    socket.on("gameFound", ({ roomId, opponent, playerTurn }) => {
       setLoading(false);
 
       toast.success("حریف شما پیدا شد درحال انتقال به بازی...", {
@@ -37,8 +37,9 @@ const RockPaperScissors = ({ user }) => {
         },
       });
 
-      console.log(roomId);
-      console.log(opponent);
+      router.push(`/rps/${roomId}`);
+
+      console.log({ roomId, opponent, playerTurn });
     });
 
     return () => socket.off();
@@ -46,7 +47,7 @@ const RockPaperScissors = ({ user }) => {
 
   const findGameHandler = () => {
     setLoading(true);
-    socket.emit("findGame");
+    socket.emit("findGame", { userId: user._id });
   };
 
   return (

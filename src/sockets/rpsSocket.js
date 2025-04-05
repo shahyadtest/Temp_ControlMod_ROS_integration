@@ -5,6 +5,7 @@ let io;
 const onlineUsers = {}; // online users
 let waitingPlayer = null;
 const gameMoves = {};
+const playerTurn = {}; // نگهداری نوبت هر بازیکن
 
 const rpsSocket = (httpServer) => {
   if (!io) {
@@ -18,7 +19,7 @@ const rpsSocket = (httpServer) => {
         io.emit("onlineUsers", Object.values(onlineUsers));
       });
 
-      socket.on("findGame", () => handleFindGame(socket));
+      socket.on("findGame", () => handleFindGame(socket)); // حفظ findGame
 
       socket.on("makeMove", ({ roomId, move }) =>
         handleMakeMove(socket, roomId, move)
@@ -54,14 +55,17 @@ const handleFindGame = async (socket) => {
         io.to(waitingPlayer).emit("gameFound", {
           roomId,
           opponent: onlineUsers[socket.id],
+          playerTurn: onlineUsers[waitingPlayer],
         });
         io.to(socket.id).emit("gameFound", {
           roomId,
           opponent: onlineUsers[waitingPlayer],
+          playerTurn: onlineUsers[waitingPlayer],
         });
 
         // save moves
         gameMoves[roomId] = {};
+        playerTurn[roomId] = onlineUsers[waitingPlayer].userId; // first player starts
       }
 
       waitingPlayer = null;
@@ -78,7 +82,22 @@ const handleFindGame = async (socket) => {
 const handleMakeMove = async (socket, roomId, move) => {
   if (!gameMoves[roomId]) return;
 
+  const currentPlayer = onlineUsers[socket.id].userId;
+  const currentTurn = playerTurn[roomId];
+
+  // Check if it's the player's turn
+  if (currentPlayer !== currentTurn) {
+    socket.emit("notYourTurn", "It's not your turn yet!");
+    return;
+  }
+
   gameMoves[roomId][onlineUsers[socket.id]] = move; // save move
+
+  // Switch turn to the other player
+  playerTurn[roomId] =
+    currentPlayer === onlineUsers[roomId].player1
+      ? onlineUsers[roomId].player2
+      : onlineUsers[roomId].player1;
 
   const players = Object.keys(gameMoves[roomId]);
   if (players.length === 2) {
@@ -94,18 +113,8 @@ const handleMakeMove = async (socket, roomId, move) => {
         : Object.keys(gameMoves[roomId])[1];
 
     // save moves & result in db
-    try {
-      await axios.post("http://localhost:3000/api/game/finish", {
-        roomId,
-        moves: gameMoves[roomId],
-        winner,
-      });
-
-      io.to(roomId).emit("gameOver", { result, winner });
-      delete gameMoves[roomId]; // clear moves
-    } catch (error) {
-      console.error("❌ Error finishing game:", error);
-    }
+    io.to(roomId).emit("gameOver", { result, winner, gameMoves });
+    delete gameMoves[roomId]; // clear moves
   }
 };
 

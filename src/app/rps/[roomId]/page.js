@@ -43,7 +43,7 @@ const page = async ({ params }) => {
         </div>
       </div>
 
-      <RPSGameButtons />
+      <RPSGameButtons roomId={roomId} roomInfo={roomInfo} user={user} />
     </div>
   );
 };

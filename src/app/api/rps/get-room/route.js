@@ -54,6 +54,7 @@ export async function POST(req) {
         roomId,
         user,
         opponent,
+        host: player1,
       },
       { status: 200 }
     );
