@@ -34,11 +34,23 @@ const RPSGameButtons = ({ roomId, roomInfo, user }) => {
   ];
 
   useEffect(() => {
-    socket.on("turnUpdate", ({ turn }) => {
-      console.log(turn);
+    socket.emit("joinRoom", roomId);
+
+    socket.emit("userInfo", {
+      userId: user._id,
+      userName: user.userName,
+      nickName: user.nickName,
     });
 
-    socket.on("gameOver", ({ result, winner }) => {
+    socket.on("waitingForOpponent", ({ currentPlayer }) => {
+      if (currentPlayer === user._id) {
+        setTurn(false);
+      } else {
+        setTurn(true);
+      }
+    });
+
+    socket.on("gameOver", ({ result, winner, gameMoves }) => {
       setGameResult({ result, winner, gameMoves });
     });
 

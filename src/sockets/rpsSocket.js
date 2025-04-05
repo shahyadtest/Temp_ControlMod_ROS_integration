@@ -15,16 +15,19 @@ const rpsSocket = (httpServer) => {
       console.log(`🔵 User connected: ${socket.id}`);
 
       socket.on("userInfo", async ({ userId, userName, nickName }) => {
-        onlineUsers[socket.id] = { userId, userName, nickName };
+        socket.userId = userId; // userId رو توی سوکت ذخیره کن
+        console.log(
+          `Set socket.userId to ${socket.userId} for socket ${socket.id}`
+        );
+        onlineUsers[userId] = { socketId: socket.id, userName, nickName };
         io.emit("onlineUsers", Object.values(onlineUsers));
       });
 
       socket.on("findGame", () => handleFindGame(socket)); // حفظ findGame
-
       socket.on("makeMove", ({ roomId, move }) =>
         handleMakeMove(socket, roomId, move)
       );
-
+      socket.on("joinRoom", (roomId) => socket.join(roomId));
       socket.on("disconnect", () => handleDisconnect(socket));
     });
   }
@@ -33,8 +36,8 @@ const rpsSocket = (httpServer) => {
 // find opponent & create a room
 const handleFindGame = async (socket) => {
   if (waitingPlayer) {
-    const roomId = `room-${onlineUsers[waitingPlayer].userId}-${
-      onlineUsers[socket.id].userId
+    const roomId = `room-${waitingPlayer.userId}-${
+      socket.userId
     }-${Date.now()}`;
 
     try {
@@ -45,27 +48,30 @@ const handleFindGame = async (socket) => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             roomId,
-            player1: onlineUsers[waitingPlayer].userId,
-            player2: onlineUsers[socket.id].userId,
+            player1: waitingPlayer.userId,
+            player2: socket.userId,
           }),
         }
       );
 
       if (createRoomRes.ok) {
-        io.to(waitingPlayer).emit("gameFound", {
+        // جوین کردن سوکت‌ها به اتاق
+        waitingPlayer.join(roomId);
+        socket.join(roomId);
+
+        io.to(waitingPlayer.id).emit("gameFound", {
           roomId,
-          opponent: onlineUsers[socket.id],
-          playerTurn: onlineUsers[waitingPlayer],
+          opponent: onlineUsers[socket.userId],
+          playerTurn: onlineUsers[waitingPlayer.userId],
         });
         io.to(socket.id).emit("gameFound", {
           roomId,
-          opponent: onlineUsers[waitingPlayer],
-          playerTurn: onlineUsers[waitingPlayer],
+          opponent: onlineUsers[waitingPlayer.userId],
+          playerTurn: onlineUsers[waitingPlayer.userId],
         });
 
-        // save moves
         gameMoves[roomId] = {};
-        playerTurn[roomId] = onlineUsers[waitingPlayer].userId; // first player starts
+        playerTurn[roomId] = waitingPlayer.userId; // نوبت بازیکن اول
       }
 
       waitingPlayer = null;
@@ -73,56 +79,71 @@ const handleFindGame = async (socket) => {
       console.error("❌ Error creating game room:", error);
     }
   } else {
-    waitingPlayer = socket.id;
+    waitingPlayer = socket;
     socket.emit("waiting");
   }
 };
 
 // save moves(analyse) & game result
 const handleMakeMove = async (socket, roomId, move) => {
-  if (!gameMoves[roomId]) return;
+  console.log(`Received move from ${socket.userId} in room ${roomId}: ${move}`);
 
-  const currentPlayer = onlineUsers[socket.id].userId;
-  const currentTurn = playerTurn[roomId];
-
-  // Check if it's the player's turn
-  if (currentPlayer !== currentTurn) {
-    socket.emit("notYourTurn", "It's not your turn yet!");
+  if (!gameMoves[roomId]) {
+    console.log(`Room ${roomId} not found in gameMoves`);
     return;
   }
 
-  gameMoves[roomId][onlineUsers[socket.id]] = move; // save move
+  const currentPlayer = socket.userId;
+  console.log(`Current player: ${currentPlayer}`);
 
-  // Switch turn to the other player
-  playerTurn[roomId] =
-    currentPlayer === onlineUsers[roomId].player1
-      ? onlineUsers[roomId].player2
-      : onlineUsers[roomId].player1;
+  // ذخیره حرکت بازیکن فعلی
+  gameMoves[roomId][currentPlayer] = move;
+  console.log(`Updated gameMoves[${roomId}]:`, gameMoves[roomId]);
 
-  const players = Object.keys(gameMoves[roomId]);
-  if (players.length === 2) {
-    // both players make their moves show result
-    const { player1, player2 } = gameMoves[roomId];
-    const result = determineWinner(player1, player2);
+  // چک کردن اینکه هر دو بازیکن حرکت کردن یا نه
+  const playerKeys = Object.keys(gameMoves[roomId]);
+  console.log(`Players who moved: ${playerKeys}`);
 
+  if (
+    playerKeys.length === 2 &&
+    gameMoves[roomId][playerKeys[0]] &&
+    gameMoves[roomId][playerKeys[1]]
+  ) {
+    const [player1, player2] = playerKeys;
+    const move1 = gameMoves[roomId][player1];
+    const move2 = gameMoves[roomId][player2];
+    console.log(`Moves - ${player1}: ${move1}, ${player2}: ${move2}`);
+
+    const result = determineWinner(move1, move2);
     const winner =
-      result === "draw"
-        ? "draw"
-        : result === "player1"
-        ? Object.keys(gameMoves[roomId])[0]
-        : Object.keys(gameMoves[roomId])[1];
+      result === "draw" ? "draw" : result === "player1" ? player1 : player2;
+    console.log(`Game result: ${result}, Winner: ${winner}`);
 
-    // save moves & result in db
-    io.to(roomId).emit("gameOver", { result, winner, gameMoves });
-    delete gameMoves[roomId]; // clear moves
+    io.to(roomId).emit("gameOver", {
+      result,
+      winner,
+      gameMoves: gameMoves[roomId],
+    });
+    console.log(`Sent gameOver to room ${roomId}`);
+    delete gameMoves[roomId];
+  } else {
+    io.to(roomId).emit("waitingForOpponent", {
+      message: "منتظر حرکت حریف باشید!",
+      currentPlayer,
+    });
+    console.log(`Sent waitingForOpponent to ${socket.userId}`);
   }
 };
 
 // user disconnect handler
 const handleDisconnect = (socket) => {
   console.log(`🔴 User disconnected: ${socket.id}`);
-  delete onlineUsers[socket.id];
-  if (waitingPlayer === socket.id) waitingPlayer = null;
+  if (socket.userId) {
+    delete onlineUsers[socket.userId];
+  }
+  if (waitingPlayer && waitingPlayer.userId === socket.userId) {
+    waitingPlayer = null;
+  }
   io.emit("onlineUsers", Object.values(onlineUsers));
 };
 
