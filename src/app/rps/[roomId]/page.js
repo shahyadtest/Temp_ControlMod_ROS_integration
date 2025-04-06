@@ -27,7 +27,7 @@ const page = async ({ params }) => {
     <div className="relative max-w-[450px] flex flex-col gap-5 w-full h-screen bg-primaryDarkTheme overflow-hidden p-5">
       <Background />
 
-      <div className="w-full flex justify-between items-center">
+      <div className="w-full flex justify-between items-center bg-primaryDarkTheme">
         <h1 className="bg-gradient-to-b from-white to-gray-400 bg-clip-text text-transparent">
           بازی سنگ کاغذ قیچی
         </h1>

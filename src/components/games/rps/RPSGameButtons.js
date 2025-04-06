@@ -78,7 +78,7 @@ const RPSGameButtons = ({ roomId, roomInfo, user }) => {
 
       <button
         disabled={!turn}
-        className="w-32 h-16 flex justify-center items-center rounded-t-full bg-secondaryDarkTheme absolute left-2/4 -translate-x-2/4 -bottom-5 disabled:opacity-80"
+        className="w-32 h-16 flex justify-center items-center rounded-t-full bg-secondaryDarkTheme absolute left-2/4 -translate-x-2/4 -bottom-5 disabled:opacity-80 z-50"
       >
         <Image
           src={"/rps/random-icon.svg"}
@@ -99,7 +99,7 @@ const RPSGameButtons = ({ roomId, roomInfo, user }) => {
             item.id === selectedMove?.id
               ? "bg-blueColor"
               : "bg-secondaryDarkTheme"
-          } hover:bg-blueColor disabled:opacity-80 transition-all duration-300`}
+          } hover:bg-blueColor disabled:opacity-80 transition-all duration-300 z-50`}
         >
           <Image
             src={item.icon}
@@ -110,32 +110,25 @@ const RPSGameButtons = ({ roomId, roomInfo, user }) => {
         </button>
       ))}
 
-      {/* <button className="w-16 h-16 flex justify-center items-center rounded-full bg-secondaryDarkTheme absolute left-2/4 -translate-x-2/4 bottom-2 -ml-[100px]">
+      {/* user move hand */}
+      <div className="">
         <Image
-          src={"/rps/r-icon.svg"}
-          width={100}
-          height={100}
-          className="size-8 block"
+          src={"/rps/hand.svg"}
+          width={400}
+          height={800}
+          className="w-full max-w-40 absolute -bottom-24 right-0"
         />
-      </button>
+      </div>
 
-      <button className="w-16 h-16 flex justify-center items-center rounded-full bg-secondaryDarkTheme absolute left-2/4 -translate-x-2/4 bottom-[60px]">
+      {/* opponent move hand */}
+      <div className="">
         <Image
-          src={"/rps/p-icon.svg"}
-          width={100}
-          height={100}
-          className="size-8 block"
+          src={"/rps/hand.svg"}
+          width={400}
+          height={800}
+          className="w-full max-w-40 absolute -top-24 left-0 -scale-x-100 -scale-y-100"
         />
-      </button>
-
-      <button className="w-16 h-16 flex justify-center items-center rounded-full bg-secondaryDarkTheme absolute left-2/4 -translate-x-2/4 bottom-2 ml-[100px]">
-        <Image
-          src={"/rps/s-icon.svg"}
-          width={100}
-          height={100}
-          className="size-8 block"
-        />
-      </button> */}
+      </div>
     </div>
   );
 };
