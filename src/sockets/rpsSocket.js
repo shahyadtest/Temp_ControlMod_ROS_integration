@@ -1,5 +1,6 @@
 const { Server } = require("socket.io");
 const axios = require("axios");
+const { baseURL } = require("@/services/API");
 
 let io;
 const onlineUsers = {}; // online users
@@ -42,7 +43,7 @@ const handleFindGame = async (socket) => {
 
     try {
       const createRoomRes = await fetch(
-        `http://localhost:3000/api/rps/create-room`,
+        `${baseURL}/api/rps/create-room`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
