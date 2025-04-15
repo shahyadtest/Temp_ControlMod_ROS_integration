@@ -1,4 +1,3 @@
-import Auth from "@/components/auth/Auth";
 import Background from "@/components/chessboard/Background";
 import CustomChessBoard from "@/components/chessboard/CustomChessBoard";
 import React from "react";
@@ -10,7 +9,7 @@ const page = () => {
       <Auth />
 
       <div className="w-full relative z-10 text-white text-3xl font-bold">
-        <CustomChessBoard />
+        
       </div>
     </div>
   );
