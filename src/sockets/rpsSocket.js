@@ -1,6 +1,6 @@
 const { Server } = require("socket.io");
 const axios = require("axios");
-const { baseURL } = require("@/services/API");
+const { baseURL } = require("../services/API");
 
 let io;
 const onlineUsers = {}; // online users
