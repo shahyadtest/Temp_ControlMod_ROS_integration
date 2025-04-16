@@ -9,10 +9,12 @@ export const SocketContextData = createContext();
 const socket = io(siteURL);
 
 const SocketContext = ({ children, userInfo }) => {
-  const { user } = userInfo;
+  const user = userInfo?.user;
   const [onlineUsers, setOnlineUsers] = useState([]);
 
   useEffect(() => {
+    if (!user) return;
+
     socket.emit("userInfo", {
       userId: user._id,
       userName: user.userName,
