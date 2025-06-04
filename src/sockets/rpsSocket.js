@@ -72,7 +72,7 @@ const handleFindGame = async (socket) => {
         });
         io.to(socket.id).emit("gameFound", {
           roomId,
-          opponent: onlineUsers[waitingPlayer.userId],
+          opponent: onlineUsers[socket.userId],
           playerTurn: onlineUsers[waitingPlayer.userId],
         });
 

@@ -57,6 +57,8 @@ const RockPaperScissors = ({ user }) => {
     socket.emit("cancelGame");
   };
 
+  console.log(gameInfo)
+
   return (
     <>
       <Toaster />

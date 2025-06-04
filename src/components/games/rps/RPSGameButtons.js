@@ -23,7 +23,7 @@ const RPSGameButtons = ({ roomId, roomInfo, user }) => {
   const [turn, setTurn] = useState(roomInfo?.host?._id === user._id);
   const [resultMessage, setResultMessage] = useState(null);
   const [saveResultLoading, setSaveResultLoading] = useState(false);
-  const [playersMoves, setPlayersMoves] = useState({});
+  const [playersMoves, setPlayersMoves] = useState([]);
   const [playersMovesImage, setPlayersMovesImage] = useState({
     me: "/rps/hand.svg",
     opponent: "/rps/hand.svg",
@@ -77,7 +77,7 @@ const RPSGameButtons = ({ roomId, roomInfo, user }) => {
 
     socket.on("gameOver", ({ result, winner, gameMoves }) => {
       setSelectedMove({});
-      setPlayersMoves(gameMoves);
+      setPlayersMoves((prev) => [...prev, gameMoves]);
 
       // set points & result message
       if (winner === user._id) {
@@ -148,39 +148,45 @@ const RPSGameButtons = ({ roomId, roomInfo, user }) => {
   };
 
   const backHomePageHandler = () => {
-    toast.success("درحال انتقال به صفحه اصلی...", {
-      duration: 4000,
-      style: {
-        borderRadius: "10px",
-        background: "#040e1c",
-        color: "#fff",
-        fontSize: "14px",
-      },
-    });
+    // toast.success("درحال انتقال به صفحه اصلی...", {
+    //   duration: 4000,
+    //   style: {
+    //     borderRadius: "10px",
+    //     background: "#040e1c",
+    //     color: "#fff",
+    //     fontSize: "14px",
+    //   },
+    // });
 
     router.push("/");
   };
+
+  console.log(playersMoves)
 
   return (
     <div className="w-full h-full relative max-w-[450px]">
       <Toaster />
 
       {/* round result message */}
-      <div
-        className={`fixed ${
-          resultMessage ? "opacity-100 visible" : "opacity-0 invisible"
-        } w-full max-w-[450px] h-full flex justify-center items-center text-2xl font-black z-[60] top-0 right-0 bottom-0 bg-black bg-opacity-75 transition-all duration-300`}
-      >
-        {resultMessage === "win" ? (
-          <span className="text-success">آفرین! این دست و بردی</span>
-        ) : resultMessage === "lose" ? (
-          <span className="text-red-600">ای وای! این دست و باختی</span>
-        ) : resultMessage === "draw" ? (
-          <span className="text-gray-200">این دست مساوی شد!</span>
-        ) : (
-          ""
-        )}
-      </div>
+      {!gameResult ? (
+        <div
+          className={`fixed ${
+            resultMessage && !gameResult ? "opacity-100 visible" : "opacity-0 invisible"
+          } w-full max-w-[450px] h-full flex justify-center items-center text-2xl font-black z-[60] top-0 right-0 bottom-0 bg-black bg-opacity-75 transition-all duration-300`}
+        >
+          {resultMessage === "win" ? (
+            <span className="text-success">آفرین! این دست و بردی</span>
+          ) : resultMessage === "lose" ? (
+            <span className="text-red-600">ای وای! این دست و باختی</span>
+          ) : resultMessage === "draw" ? (
+            <span className="text-gray-200">این دست مساوی شد!</span>
+          ) : (
+            ""
+          )}
+        </div>
+      ) : (
+        ""
+      )}
 
       {/* game result message */}
       <div
@@ -202,7 +208,7 @@ const RPSGameButtons = ({ roomId, roomInfo, user }) => {
 
         <div className="w-full flex justify-center items-center gap-16 text-sm text-gray-200">
           <span>امتیاز شما: {toFarsiNumber(points.me / 10)}</span>
-          <span>امتیاز حریف: {toFarsiNumber(points.me / 10)}</span>
+          <span>امتیاز حریف: {toFarsiNumber(points.opponent / 10)}</span>
         </div>
 
         <p className="text-xs font-normal text-gray-300 -mt-1">
