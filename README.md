@@ -23,7 +23,7 @@ to ROS 2 via **UART**, enabling:
 ## ✨ Features
 
 - Bidirectional UART ↔ ROS 2 communication
-- Real-time telemetry (100 Hz)
+- Real-time telemetry (~100 Hz, limited by UART bandwidth)
 - Remote setpoint commands
 - Online control metrics (IAE, ISE, ITAE, RMSE, overshoot, settling time)
 - rosbag logging support
@@ -43,7 +43,7 @@ to ROS 2 via **UART**, enabling:
 - `/notebooks/` → data analysis (optional)
 
 ### Embedded firmware
-- `/control_temp_LC/` → Teensy / Arduino control firmware (C/C++)
+- `/control_temp_LC3/` → Teensy / Arduino firmware (compiled independently, not part of colcon build)
 
 ### Package configuration
 - `package.xml`
@@ -183,7 +183,7 @@ source install/setup.bash
 
 ### Option A — Launch (recommended)
 ```bash
-ros2 launch uart_ros_bridge temp_control.launch.py
+ros2 launch uart_ros_bridge system.launch.py
 ```
 
 ### Option B — Run nodes manually
@@ -199,7 +199,7 @@ ros2 run uart_ros_bridge control_metrics
 
 Send a new setpoint:
 ```bash
-ros2 topic pub /ref_cmd std_msgs/Float32 "{data: 60.0}"
+ros2 topic pub /ref_cmd std_msgs/msg/Float32 "{data: 40.0}"
 ```
 
 Quick check:
@@ -212,6 +212,49 @@ Plot:
 ```bash
 rqt_plot /temp /ref /u
 ```
+
+# 🚀 Quick Test (5-minute demo)
+
+### 1) Launch
+
+```bash
+source /opt/ros/humble/setup.bash
+source ~/ros2_ws/install/setup.bash
+ros2 launch uart_ros_bridge system.launch.py
+```
+
+### 2) Check telemetry (raw UART frame)
+
+```bash
+ros2 topic echo /temp_u_ref
+```
+
+### 3) Check individual signals
+
+```bash
+ros2 topic echo /temp
+ros2 topic echo /u
+ros2 topic echo /ref
+```
+
+### 4) Change setpoint (one-shot)
+
+```bash
+ros2 topic pub --once /ref_cmd std_msgs/msg/Float32 "{data: 40.0}"
+```
+### 5) Plot
+
+```bash
+source /opt/ros/humble/setup.bash
+source ~/ros2_ws/install/setup.bash
+rqt
+```
+
+Then open Plugins → Visualization → Plot and add:
+
+- `/temp`
+- `/ref`
+- `/u`
 
 ## 📁 Utilities
 
