@@ -5,6 +5,8 @@
 ![Platform](https://img.shields.io/badge/Platform-Raspberry%20Pi-orange)
 ![License](https://img.shields.io/badge/License-MIT-lightgrey)
 
+## Overview
+
 This repository provides the **ROS 2 Humble integration layer** for the main
 temperature control platform:
 
