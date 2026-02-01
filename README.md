@@ -7,11 +7,60 @@ It runs on a **Raspberry Pi** and bridges an embedded controller (MCU) to ROS 2 
 and receiving setpoint commands.
 
 
+## 📂 Contents
+
+- `/uart_ros_bridge/` → ROS 2 nodes (UART bridge + control metrics)
+- `/launch/` → launch files to start the full system
+- `/scripts/` → offline utilities (CSV merge, analysis)
+- `/docs/` → architecture diagrams and screenshots
+- `/notebooks/` → data analysis (optional)
+- `package.xml / setup.py` → ROS 2 package configuration
+- `/control_temp_LC  `→ C code for Arduino/Teensy.
+
+### 🔗 Related repositories
+
+- **Embedded firmware (MCU / control loop)**  
+  👉 https://github.com/CrissCCL/Temp_ControlMod
+
+
 ## 🏗️ Architecture
 
 <p align="center">
 <img src="https://github.com/user-attachments/assets/303aca80-6a6e-42b3-863a-67e5829025dd" alt="Architecture" width="700">
 </p>
+
+## 🔌 Embedded Firmware (Teensy)
+The Teensy runs the real-time PI temperature control loop and communicates with ROS via UART.
+The ROS 2 nodes communicate with a Teensy-based embedded controller running the
+real-time temperature control loop.
+
+The firmware implements **bidirectional UART communication**:
+
+### Telemetry (MCU → ROS)
+
+```
+temp,u,ref\n
+```
+
+### Command (ROS → MCU)
+
+```
+REF:<value>\n
+```
+
+Where:
+
+- `temp` → measured temperature
+- `u` → control effort
+- `ref` → active setpoint
+
+## UART
+- Serial1
+- 57600 baud
+- 8N1
+
+## Notes
+This firmware is independent from the ROS package and is compiled using Arduino/Teensyduino.
 
 ## 📡 Topics
 
