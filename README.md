@@ -1,26 +1,35 @@
 # 🔥 Temp Control Module — ROS 2 Humble Integration (UART Bridge)
 
-This repository provides the **ROS 2 (Humble)** integration layer for the main temperature-control project:
-- Main project (hardware/firmware/control): https://github.com/CrissCCL/Temp_ControlMod
+This repository provides the **ROS 2 Humble integration layer** for the main
+temperature control platform:
 
-It runs on a **Raspberry Pi** and bridges an embedded controller (MCU) to ROS 2 via **UART**, publishing telemetry
-and receiving setpoint commands.
+👉 Main embedded project (hardware + firmware + control)  
+https://github.com/CrissCCL/Temp_ControlMod
+
+It runs on a **Raspberry Pi** and bridges an embedded controller (Teensy/MCU)
+to ROS 2 via **UART**, enabling:
+
+- Real-time telemetry streaming
+- Remote setpoint commands
+- Online control performance metrics
+- Logging, visualization, and data analysis
 
 
-## 📂 Contents
+# 📂 Contents
 
-- `/uart_ros_bridge/` → ROS 2 nodes (UART bridge + control metrics)
-- `/launch/` → launch files to start the full system
+### ROS 2 (middleware layer)
+- `/uart_ros_bridge/` → UART bridge + control metrics nodes
+- `/launch/` → system launch files
 - `/scripts/` → offline utilities (CSV merge, analysis)
-- `/docs/` → architecture diagrams and screenshots
+- `/docs/` → diagrams and screenshots
 - `/notebooks/` → data analysis (optional)
-- `package.xml / setup.py` → ROS 2 package configuration
-- `/control_temp_LC  `→ C code for Arduino/Teensy.
 
-### 🔗 Related repositories
+### Embedded firmware
+- `/control_temp_LC/` → Teensy / Arduino control firmware (C/C++)
 
-- **Embedded firmware (MCU / control loop)**  
-  👉 https://github.com/CrissCCL/Temp_ControlMod
+### Package configuration
+- `package.xml`
+- `setup.py`
 
 
 ## 🏗️ Architecture
@@ -29,12 +38,10 @@ and receiving setpoint commands.
 <img src="https://github.com/user-attachments/assets/303aca80-6a6e-42b3-863a-67e5829025dd" alt="Architecture" width="700">
 </p>
 
-## 🔌 Embedded Firmware (Teensy)
-The Teensy runs the real-time PI temperature control loop and communicates with ROS via UART.
-The ROS 2 nodes communicate with a Teensy-based embedded controller running the
-real-time temperature control loop.
+# 🔌 Embedded Firmware (Teensy)
 
-The firmware implements **bidirectional UART communication**:
+The Teensy executes the **real-time PI temperature control loop** and communicates
+with ROS 2 using a simple ASCII UART protocol.
 
 ### Telemetry (MCU → ROS)
 
@@ -54,33 +61,28 @@ Where:
 - `u` → control effort
 - `ref` → active setpoint
 
-## UART
+### UART settings
 - Serial1
 - 57600 baud
 - 8N1
 
-## Notes
-This firmware is independent from the ROS package and is compiled using Arduino/Teensyduino.
+Firmware is compiled with **Arduino/Teensyduino** and runs independently from ROS.
 
-## 📡 Topics
+# 📡 ROS Topics
 
-### Published
+## Published
 | Topic | Type | Description |
 |------|------|-------------|
-| `/temp` | `std_msgs/Float32` | Temperature measurement |
-| `/u` | `std_msgs/Float32` | Control effort |
-| `/ref` | `std_msgs/Float32` | Reference setpoint (as reported by MCU) |
-| `/temp_u_ref` | `std_msgs/String` | Raw line `"temp,u,ref"` |
+| `/temp` | Float32 | Temperature measurement |
+| `/u` | Float32 | Control effort |
+| `/ref` | Float32 | Active setpoint |
+| `/temp_u_ref` | String | Raw telemetry line |
+| `/control_metrics` | String | Online performance metrics |
 
-### Subscribed
+## Subscribed
 | Topic | Type | Description |
 |------|------|-------------|
-| `/ref_cmd` | `std_msgs/Float32` | Setpoint command to be sent to MCU as `REF:<value>` |
-
-### Metrics
-| Topic | Type | Description |
-|------|------|-------------|
-| `/control_metrics` | `std_msgs/String` | Online metrics (IAE/ISE/ITAE/MAE/RMSE + overshoot/settling for steps) |
+| `/ref_cmd` | Float32 | New setpoint command |
 
 
 
@@ -123,7 +125,6 @@ sudo usermod -a -G dialout $USER
 # logout/login
 ```
 
----
 
 ## 🧱 Build (colcon)
 
@@ -136,7 +137,6 @@ colcon build
 source install/setup.bash
 ```
 
----
 
 ## ▶️ Run
 
@@ -172,8 +172,6 @@ Plot:
 rqt_plot /temp /ref /u
 ```
 
----
-
 ## 📁 Utilities
 
 ### Merge exported CSV (offline analysis)
@@ -182,7 +180,9 @@ If you export ROS bag topics to CSV files (e.g., `temp.csv`, `u.csv`, `ref.csv`)
 python3 scripts/merge_temp_u_ref_csv.py
 ```
 
----
+### 🔗 Related repositories 
+- **Embedded firmware (MCU / control loop)**
+- 👉 https://github.com/CrissCCL/Temp_ControlMod
 
 ## 🤝 Support projects
  Support me on Patreon [https://www.patreon.com/c/CrissCCL](https://www.patreon.com/c/CrissCCL)
