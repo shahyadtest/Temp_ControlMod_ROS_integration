@@ -95,6 +95,19 @@ Firmware is compiled with **Arduino/Teensyduino** and runs independently from RO
 - Digital twin experimentation
 - Teaching automatic control
 
+# 📊 Results / Visualization
+
+### Step response (rqt_plot)
+
+<p align="center">
+<img src="https://github.com/user-attachments/assets/6322119f-1d2f-42a3-8476-69153b95efd8" width="800">
+</p>
+
+### Runtime environment (Raspberry Pi + ROS nodes)
+
+<p align="center">
+<img src="https://github.com/user-attachments/assets/b95ee6c6-966e-4d17-8ac4-cd412d26d0c2" width="800">
+</p>
 
 # 📡 ROS Topics
 
