@@ -135,7 +135,9 @@ python3 scripts/merge_temp_u_ref_csv.py
 
 ---
 
-## 📜 License
+## 🤝 Support projects
+ Support me on Patreon [https://www.patreon.com/c/CrissCCL](https://www.patreon.com/c/CrissCCL)
 
-MIT
+## 📜 License
+MIT License  
 
