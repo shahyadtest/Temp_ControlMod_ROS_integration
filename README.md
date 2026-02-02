@@ -33,8 +33,6 @@ to ROS 2 via **UART**, enabling:
 - Designed for control engineering education and experimentation
 
 
-
-
 # 📂 Contents
 
 ### ROS 2 (middleware layer)
@@ -70,10 +68,6 @@ Physical connections:
 - Teensy → temperature sensor + actuator (heater/fan)
 - UART (Serial1) → Raspberry Pi
 - Raspberry Pi → ROS 2 nodes (bridge + metrics + visualization)
-
-
-
-
 
 
 # 🔌 Embedded Firmware (Teensy)
@@ -287,12 +281,15 @@ python3 scripts/merge_temp_u_ref_csv.py
 ```
 
 ### 🔗 Related repositories 
+
 - **Embedded firmware (MCU / control loop)**
 - 👉 https://github.com/CrissCCL/Temp_ControlMod
 
 ## 🤝 Support projects
+
  Support me on Patreon [https://www.patreon.com/c/CrissCCL](https://www.patreon.com/c/CrissCCL)
 
 ## 📜 License
+
 MIT License  
 
