@@ -10,6 +10,9 @@ const baseURL = "http://localhost:3000";
 //   ? "http://localhost:3000"
 //   : "https://chess-production-9ba7.up.railway.app";
 
+// New: Store pending invitations
+const pendingInvitations = {};
+
 const rpsSocket = (httpServer) => {
   if (!io) {
     io = new Server(httpServer, { cors: { origin: "*" } });
@@ -29,6 +32,16 @@ const rpsSocket = (httpServer) => {
           userId,
         };
         io.emit("onlineUsers", Object.values(onlineUsers));
+
+        // Send any pending invitations to the user
+        if (pendingInvitations[userId]) {
+          pendingInvitations[userId].forEach((invitation) => {
+            socket.emit("gameInvitation", {
+              from: invitation.from,
+              invitationId: invitation.invitationId,
+            });
+          });
+        }
       });
 
       socket.on("findGame", () => handleFindGame(socket)); // حفظ findGame
@@ -37,8 +50,232 @@ const rpsSocket = (httpServer) => {
       );
       socket.on("joinRoom", (roomId) => socket.join(roomId));
       socket.on("cancelGame", () => handleDisconnect(socket));
+
+      // New: Handle game invitations
+      socket.on("inviteFriend", ({ friendId }) =>
+        handleInviteFriend(socket, friendId)
+      );
+      socket.on("acceptInvitation", ({ invitationId }) =>
+        handleAcceptInvitation(socket, invitationId)
+      );
+      socket.on("rejectInvitation", ({ invitationId }) =>
+        handleRejectInvitation(socket, invitationId)
+      );
     });
   }
+};
+
+// New: Handle friend invitation
+const handleInviteFriend = (socket, friendId) => {
+  const inviterId = socket.userId;
+
+  // Check if friend is online
+  if (!onlineUsers[friendId]) {
+    socket.emit("invitationError", { message: "دوست شما آنلاین نیست!" });
+    return;
+  }
+
+  // Create invitation ID
+  const invitationId = `inv-${inviterId}-${friendId}-${Date.now()}`;
+
+  // Store invitation
+  if (!pendingInvitations[friendId]) {
+    pendingInvitations[friendId] = [];
+  }
+
+  pendingInvitations[friendId].push({
+    invitationId,
+    from: {
+      userId: inviterId,
+      userName: onlineUsers[inviterId].userName,
+      nickName: onlineUsers[inviterId].nickName,
+    },
+    timestamp: Date.now(),
+  });
+
+  // Send invitation to friend
+  io.to(onlineUsers[friendId].socketId).emit("gameInvitation", {
+    invitationId,
+    from: {
+      userId: inviterId,
+      userName: onlineUsers[inviterId].userName,
+      nickName: onlineUsers[inviterId].nickName,
+    },
+  });
+
+  // Notify inviter that invitation was sent
+  socket.emit("invitationSent", {
+    to: friendId,
+    invitationId,
+  });
+
+  // Set timeout to automatically remove invitation after 2 minutes
+  setTimeout(() => {
+    if (pendingInvitations[friendId]) {
+      pendingInvitations[friendId] = pendingInvitations[friendId].filter(
+        (inv) => inv.invitationId !== invitationId
+      );
+
+      if (pendingInvitations[friendId].length === 0) {
+        delete pendingInvitations[friendId];
+      }
+
+      // Notify both users that invitation expired
+      if (onlineUsers[inviterId]) {
+        io.to(onlineUsers[inviterId].socketId).emit("invitationExpired", {
+          invitationId,
+        });
+      }
+
+      if (onlineUsers[friendId]) {
+        io.to(onlineUsers[friendId].socketId).emit("invitationExpired", {
+          invitationId,
+        });
+      }
+    }
+  }, 120000); // 2 minutes
+};
+
+// New: Handle invitation acceptance
+const handleAcceptInvitation = async (socket, invitationId) => {
+  const accepterId = socket.userId;
+
+  // Find the invitation
+  let invitation = null;
+  let inviterUserId = null;
+
+  if (pendingInvitations[accepterId]) {
+    invitation = pendingInvitations[accepterId].find(
+      (inv) => inv.invitationId === invitationId
+    );
+    if (invitation) {
+      inviterUserId = invitation.from.userId;
+    }
+  }
+
+  if (!invitation) {
+    socket.emit("invitationError", {
+      message: "دعوت نامه معتبر نیست یا منقضی شده است!",
+    });
+    return;
+  }
+
+  // Check if inviter is still online
+  if (!onlineUsers[inviterUserId]) {
+    socket.emit("invitationError", { message: "دعوت کننده آنلاین نیست!" });
+
+    // Remove invitation
+    pendingInvitations[accepterId] = pendingInvitations[accepterId].filter(
+      (inv) => inv.invitationId !== invitationId
+    );
+
+    if (pendingInvitations[accepterId].length === 0) {
+      delete pendingInvitations[accepterId];
+    }
+
+    return;
+  }
+
+  // Create a room for the game
+  const roomId = `room-${inviterUserId}-${accepterId}-${Date.now()}`;
+
+  try {
+    const createRoomRes = await fetch(`${baseURL}/api/rps/create-room`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        roomId,
+        player1: inviterUserId,
+        player2: accepterId,
+        isInvitation: true,
+      }),
+    });
+
+    if (createRoomRes.ok) {
+      // Join both sockets to the room
+      const inviterSocket = io.sockets.sockets.get(
+        onlineUsers[inviterUserId].socketId
+      );
+      inviterSocket.join(roomId);
+      socket.join(roomId);
+
+      // Notify both players that game is starting
+      io.to(onlineUsers[inviterUserId].socketId).emit("gameFound", {
+        roomId,
+        opponent: onlineUsers[accepterId],
+        playerTurn: onlineUsers[inviterUserId],
+        isInvitedGame: true,
+      });
+
+      io.to(socket.id).emit("gameFound", {
+        roomId,
+        opponent: onlineUsers[inviterUserId],
+        playerTurn: onlineUsers[inviterUserId],
+        isInvitedGame: true,
+      });
+
+      gameMoves[roomId] = {};
+      playerTurn[roomId] = inviterUserId; // نوبت بازیکن اول (دعوت کننده)
+
+      // Remove invitation
+      pendingInvitations[accepterId] = pendingInvitations[accepterId].filter(
+        (inv) => inv.invitationId !== invitationId
+      );
+
+      if (pendingInvitations[accepterId].length === 0) {
+        delete pendingInvitations[accepterId];
+      }
+    }
+  } catch (error) {
+    console.error("❌ Error creating invited game room:", error);
+    socket.emit("invitationError", { message: "خطا در ایجاد اتاق بازی!" });
+  }
+};
+
+// New: Handle invitation rejection
+const handleRejectInvitation = (socket, invitationId) => {
+  const rejecterId = socket.userId;
+
+  // Find the invitation
+  let invitation = null;
+  let inviterUserId = null;
+
+  if (pendingInvitations[rejecterId]) {
+    invitation = pendingInvitations[rejecterId].find(
+      (inv) => inv.invitationId === invitationId
+    );
+    if (invitation) {
+      inviterUserId = invitation.from.userId;
+    }
+  }
+
+  if (!invitation) {
+    return; // Invitation doesn't exist or already expired
+  }
+
+  // Remove invitation
+  pendingInvitations[rejecterId] = pendingInvitations[rejecterId].filter(
+    (inv) => inv.invitationId !== invitationId
+  );
+
+  if (pendingInvitations[rejecterId].length === 0) {
+    delete pendingInvitations[rejecterId];
+  }
+
+  // Notify inviter that invitation was rejected
+  if (onlineUsers[inviterUserId]) {
+    io.to(onlineUsers[inviterUserId].socketId).emit("invitationRejected", {
+      invitationId,
+      by: {
+        userId: rejecterId,
+        userName: onlineUsers[rejecterId]?.userName || "کاربر",
+        nickName: onlineUsers[rejecterId]?.nickName,
+      },
+    });
+  }
+
+  // Confirm to rejecter
+  socket.emit("invitationRejected", { invitationId, status: "success" });
 };
 
 // find opponent & create a room

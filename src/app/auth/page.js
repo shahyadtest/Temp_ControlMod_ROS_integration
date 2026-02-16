@@ -114,7 +114,7 @@ const page = () => {
 
       <div className="relative flex flex-col justify-center items-center z-10 p-5">
         <h1 className="text-4xl font-black leading-[50px] md:leading-[70px] bg-gradient-to-b from-white to-gray-600 bg-clip-text text-transparent">
-          شطرنج آنلاین
+          گیم هاب
         </h1>
 
         <p className="text-sm bg-gradient-to-b from-white to-gray-400 bg-clip-text text-transparent">

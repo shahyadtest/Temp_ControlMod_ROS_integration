@@ -10,7 +10,7 @@ import { getUser } from "@/lib/fetchUser";
 import SocketContext from "@/context/SocketContext";
 
 export const metadata = {
-  title: "Chess Game",
+  title: "Gamehub",
 };
 
 export default async function RootLayout({ children }) {
